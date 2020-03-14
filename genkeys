@@ -1,0 +1,20 @@
+#!/bin/ksh
+
+tmp=`mktemp` || exit 1
+tmpkh=`mktemp` || exit 1
+
+./extractfp.awk /var/www/openbsd-www/build/mirrors.dat | grep '^[a-z]' | (while read url fp typ; do
+
+	host=`echo $url | cut -d/ -f3`
+	ssh-keyscan -t $typ $host > $tmp
+	newfp=`ssh-keygen -l -f $tmp | cut -d' ' -f2`
+	if [[ $fp == $newfp ]]; then
+		cat $tmp >> $tmpkh
+	else
+		echo mismatch: $host >&2
+	fi
+
+done)
+
+cat $tmpkh
+rm -f $tmp $tmpkh
