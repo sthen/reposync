@@ -1,0 +1,12 @@
+# public keys match fingerprints supplied by mirror operators, recorded in
+# 	$OpenBSD: mirrors.dat,v 1.602 2020/03/04 15:00:22 sthen Exp $
+anoncvs.au.openbsd.org ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBKDCcpTR+00ygfH+7WnZGWUKWrDvH1gaXkBeyGaVkPLf73mIJEuaCwh0aWalf+ccc76VWj6CRLnC6W3Mj/9VK7U=
+anoncvs.comstyle.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFWyL989mMJukRIbkUuFc3MeQr7gc1jVEfq7rgHzB1M1
+obsdacvs.cs.toronto.edu ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILGXaVJmoeErILiy/AcpEdXjje8qT52c1uZQ57OAeV2S
+anoncvs.fr.openbsd.org ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAWAOWswB2i9A/JPqM4HW4R/a6wnxuz6V1KLX5/UFpTt
+ftp.hostserver.de ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGtEuMXXJNl4whGkEOPWiq/XHgfzejdJvOKFL8S3kZDL
+anoncvs.jp.openbsd.org ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFYRMi3hZtnica4YOsMOloTD8PSUWSyzCrUWQaMNwAg/
+anoncvs.spacehopper.org ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICKMw1124SdeCKgPNacn7lbHziZ4YhAeI9snPUl0u7Tn
+anoncvs1.usa.openbsd.org ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKIgvVhaeuGOvJ44zt63dvMWW+Fvuqn51U7rpNv+8N4+
+anoncvs4.usa.openbsd.org ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKMu9sGkTPHktNssA8p1FJyikKe7kVD3YuSlZZkOXkDv
+anoncvs2.usa.openbsd.org ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJweu2gX1W0OvQW5LLwVfd1YDaPJ0YaBnlYhsDkmFEZa
