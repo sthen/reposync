@@ -29,6 +29,11 @@ usage()
 force=false
 flags=-i
 fwduser=anoncvs
+# Append supplied known hosts to default UserKnownHosts
+knownhosts="~/.ssh/known_hosts, ~/.ssh/known_hosts2"
+if [[ -f /usr/local/share/examples/reposync/ssh_known_hosts ]]; then
+	knownhosts="$i /usr/local/share/examples/reposync/ssh_known_hosts"
+fi
 sets=www,xenocara,ports,src
 while getopts "fl:pqs:" c; do
 	case $c in
@@ -56,7 +61,11 @@ run_rsync()
 {
 	if [[ -n $fwduser ]]; then
 		# reach rsync on the server via an ssh port-forward
-		rsync -e "ssh -S $sockfile -o ControlMaster=auto -o ControlPersist=1m  -oBatchMode=Yes -W localhost:rsync -l $fwduser" "$@" 2>&1
+		opts="-S $sockfile -oControlMaster=auto"
+		opts="$opts -oControlPersist=1m -oBatchMode=yes"
+		opts="$opts -oUserKnownHostsFile='$knownhosts'"
+		opts="$opts -W localhost:rsync -l $fwduser"
+		rsync -e "ssh $opts" "$@" 2>&1
 	else
 		rsync "$@" 2>&1
 	fi
