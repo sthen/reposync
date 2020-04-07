@@ -61,7 +61,7 @@ run_rsync()
 {
 	if [[ -n $fwduser ]]; then
 		# reach rsync on the server via an ssh port-forward
-		opts="-S $sockfile -oControlMaster=auto"
+		opts="-S $sockfile -oControlMaster=auto -oUpdateHostKeys=no"
 		opts="$opts -oControlPersist=1m -oBatchMode=yes"
 		opts="$opts -oUserKnownHostsFile='$knownhosts'"
 		opts="$opts -W localhost:rsync -l $fwduser"
