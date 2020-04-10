@@ -33,7 +33,8 @@ sets=www,xenocara,ports,src
 while getopts "fl:pqs:" c; do
 	case $c in
 	q) flags=-q		;;
-	f) force=true		;;
+	f) force=true
+	   forced=" [forced]"	;;
 	l) fwduser=$OPTARG	;;
 	p) fwduser=		;;
 	s) if [[ -n $OPTARG ]] && echo $OPTARG |
@@ -73,6 +74,7 @@ if [[ $(id -u) != $(stat -L -f "%u" "$repodir") ]]; then
 	err "should be run by the uid owning the repository"
 fi
 
+start=$(date +%s)
 oldhash=invalid
 hashfile=$rundir/reposync.hash
 lockfile=$rundir/reposync.lock
@@ -119,8 +121,14 @@ if [[ -r $hashfile ]]; then
 	# every 6h.
 	if ((age < 6*60*60)); then
 		oldhash=$(< $hashfile)
+	else
+		reason="${age}s old, "
 	fi
+else
+	reason="new fetch, "
 fi
+
+[[ $oldhash != "$newhash" ]] && reason="new files seen, "
 
 if $force || [[ $oldhash != "$newhash" ]]; then
 	# only update saved hash if sync was successful; otherwise leave
@@ -129,7 +137,14 @@ if $force || [[ $oldhash != "$newhash" ]]; then
 	    --exclude='#cvs.rfl.*' --exclude='CVSROOT/history*' \
 	    ${synchost}/{CVSROOT,${sets}} "$repodir"/; then
 		echo "$newhash" > $hashfile
+		logger -t reposync -p user.info \
+		    "${synchost}: ${reason}updated, $(($(date +%s)-start))s${forced}"
 	else
+		logger -t reposync -p user.notice \
+		    "${synchost}: ${reason}failed, $(($(date +%s)-start))s${forced}"
 		err "rsync failed"
 	fi
+else
+	logger -t reposync -p user.info \
+	    "${synchost}: no update, $(($(date +%s)-start))s"
 fi
