@@ -93,24 +93,19 @@ By default, all standard sets are fetched:
 stores a hash of the CVSROOT directory listing to detect if the
 repository has not changed
 .It Pa /var/db/reposync/known_hosts
-passed to
+.It Pa /usr/local/share/reposync/ssh_known_hosts
+both passed to
 .Xr ssh 1
-as a
 .Cm UserKnownHostsFile
 .El
 .Pp
-If
-.Pa /var/db/reposync/known_hosts
-does not exist at startup,
-.Nm
-will populate it from
-.Pa ~/.ssh/known_hosts
-or
-.Pa /usr/local/share/examples/reposync/ssh_known_hosts .
 The
 .Nm
 package provides default hostkeys of official OpenBSD mirrors known to
-support rsync over ssh-forwarding.
+support rsync over ssh-forwarding in
+.Pa /usr/local/share/reposync/ssh_known_hosts .
+If using an unofficial mirror, add the host key to
+.Pa /var/db/reposync/known_hosts .
 .Sh EXAMPLES
 .Ic $ doas -u cvs reposync rsync://mirror.example.org/cvs
 .Pp
