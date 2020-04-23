@@ -124,11 +124,13 @@ fi
 # ChangeLog but val-tags may also be updated after a checkout was done
 # using a new tag. ignore "history" (lists read-only operations).
 _t=$(run_rsync --exclude='history*' "${synchost}/CVSROOT/")
-[[ $? -eq 0 ]] || exit $?
 [[ -n $fwduser ]] && case $_t in
 	"stdio forwarding failed"*|"Stdio forwarding request failed"*)
 		err "mirror does not support ssh port-forwarding" ;;
+	"Host key verification failed"*)
+		err "host key verification failed - see $rundir/known_hosts" ;;
 esac
+[[ $? -eq 0 ]] || err "$_t"
 newhash="${synchost} ${sets} $(echo $_t | sha256)"
 
 if [[ -r $hashfile ]]; then
