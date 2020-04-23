@@ -68,7 +68,7 @@ run_rsync()
 		sshopts="$sshopts -o ControlMaster=auto"
 		sshopts="$sshopts -o ControlPersist=1m"
 		sshopts="$sshopts -o BatchMode=Yes"
-		sshopts="$sshopts -o UserKnownHostsFile=$rundir/known_hosts"
+		sshopts="$sshopts -o UserKnownHostsFile='$rundir/known_hosts /usr/local/share/reposync/ssh_known_hosts'"
 		sshopts="$sshopts -W localhost:rsync"
 		sshopts="$sshopts -l $fwduser"
 		/usr/local/bin/rsync -e "ssh $sshopts" "$@" 2>&1
@@ -108,29 +108,26 @@ if [[ -n $fwduser ]]; then
 	sshtrap="ssh -Fnone -S $sockfile -O exit -q -l $fwduser erewhon"
 else
 	sshtrap=true
+	echo "Warning: using non-authenticated cleartext rsync protocol." >&2
 fi
 trap "$sshtrap; rm -f $lockfile" 0 1 2 15
 
-if [[ ! -e $rundir/known_hosts ]]; then
-	if [[ -r ~/.ssh/known_hosts ]]; then
-		cp ~/.ssh/known_hosts $rundir/known_hosts
-	else
-		cp /usr/local/share/examples/reposync/ssh_known_hosts \
-		    $rundir/known_hosts
-	fi
+if [[ ! -e $rundir/known_hosts && -r ~/.ssh/known_hosts ]]; then
+	cp ~/.ssh/known_hosts $rundir/known_hosts
 fi
 
 # check CVSROOT directory listing to identify updates; primarily for
 # ChangeLog but val-tags may also be updated after a checkout was done
 # using a new tag. ignore "history" (lists read-only operations).
 _t=$(run_rsync --exclude='history*' "${synchost}/CVSROOT/")
+_e=$?
 [[ -n $fwduser ]] && case $_t in
 	"stdio forwarding failed"*|"Stdio forwarding request failed"*)
 		err "mirror does not support ssh port-forwarding" ;;
 	"Host key verification failed"*)
 		err "host key verification failed - see $rundir/known_hosts" ;;
 esac
-[[ $? -eq 0 ]] || err "$_t"
+[[ $_e -eq 0 ]] || err "rsync error: $_t"
 newhash="${synchost} ${sets} $(echo $_t | sha256)"
 
 if [[ -r $hashfile ]]; then
