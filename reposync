@@ -1,6 +1,6 @@
 #!/bin/ksh
 #
-# Copyright (c) 2018, 2019 Stuart Henderson <sthen@openbsd.org>
+# Copyright (c) 2018, 2019, 2020 Stuart Henderson <sthen@openbsd.org>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -52,18 +52,31 @@ shift $((OPTIND-1))
 
 synchost=$1
 repodir=${2:-/cvs}
+rundir=/var/db/reposync
+
+start=$(date +%s)
+oldhash=invalid
+hashfile=$rundir/reposync.hash
+lockfile=$rundir/reposync.lock
+sockfile=$rundir/reposync.sock
 
 run_rsync()
 {
 	if [[ -n $fwduser ]]; then
 		# reach rsync on the server via an ssh port-forward
-		rsync -e "ssh -S $sockfile -o ControlMaster=auto -o ControlPersist=1m  -oBatchMode=Yes -W localhost:rsync -l $fwduser" "$@" 2>&1
+		sshopts="-S $sockfile"
+		sshopts="$sshopts -o ControlMaster=auto"
+		sshopts="$sshopts -o ControlPersist=1m"
+		sshopts="$sshopts -o BatchMode=Yes"
+		sshopts="$sshopts -o UserKnownHostsFile=$rundir/known_hosts"
+		sshopts="$sshopts -W localhost:rsync"
+		sshopts="$sshopts -l $fwduser"
+		/usr/local/bin/rsync -e "ssh $sshopts" "$@" 2>&1
 	else
-		rsync "$@" 2>&1
+		# plain rsync-over-TCP
+		/usr/local/bin/rsync "$@" 2>&1
 	fi
 }
-
-rundir=/var/db/reposync
 
 for i in "$rundir" "$repodir"; do
 	[[ ! -d $i ]] || [[ ! -w $i ]] &&
@@ -74,11 +87,6 @@ if [[ $(id -u) != $(stat -L -f "%u" "$repodir") ]]; then
 	err "should be run by the uid owning the repository"
 fi
 
-start=$(date +%s)
-oldhash=invalid
-hashfile=$rundir/reposync.hash
-lockfile=$rundir/reposync.lock
-sockfile=$rundir/reposync.sock
 cd $rundir || err "could not cd to $rundir"
 
 if [[ -h $lockfile ]]; then
@@ -102,6 +110,15 @@ else
 	sshtrap=true
 fi
 trap "$sshtrap; rm -f $lockfile" 0 1 2 15
+
+if [[ ! -e $rundir/known_hosts ]]; then
+	if [[ -r ~/.ssh/known_hosts ]]; then
+		cp ~/.ssh/known_hosts $rundir/known_hosts
+	else
+		cp /usr/local/share/examples/reposync/ssh_known_hosts \
+		    $rundir/known_hosts
+	fi
+fi
 
 # check CVSROOT directory listing to identify updates; primarily for
 # ChangeLog but val-tags may also be updated after a checkout was done

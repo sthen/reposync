@@ -36,8 +36,8 @@ It connects to an rsync server, by default using
 port forwarding to allow verification of the upstream server.
 If only a short time has elapsed since the previous update, the
 .Pa CVSROOT
-directory on the upstream server is checked for changes and the update
-is skipped if none are detected.
+directory on the upstream server is checked for changes (typically in
+the ChangeLog file) and the update is skipped if none are detected.
 .Pp
 If
 .Ar destination
@@ -45,20 +45,21 @@ is omitted,
 .Pa /cvs
 will be used.
 .Pp
-A list of upstream servers and their
-.Xr ssh 1
-key fingerprints is available at
+A list of upstream servers holding the
+.Ox
+repository is available at
 .Lk https://www.openbsd.org/anoncvs.html .
 .Pp
-The directory
 .Pa /var/db/reposync
-must exist and be writable by the user running
+and the
+.Ar destination
+directory must exist and be writable by the user running
 .Nm .
 .Pp
 The options are as follows.
 .Bl -tag -width Ds
 .It Fl f
-Force updating, even if ChangeLog has not been updated.
+Force updating, even if CVSROOT has not been updated.
 .It Fl l Ar username
 .Xr ssh 1
 port-forwarding is used with the specified username.
@@ -86,8 +87,32 @@ Specify a comma-separated list of file sets.
 By default, all standard sets are fetched:
 .Qq www,xenocara,ports,src .
 .El
+.Sh FILES
+.Bl -tag -width "/var/db/reposync/reposync.hash" -compact
+.It Pa /var/db/reposync/reposync.hash
+stores a hash of the CVSROOT directory listing to detect if the
+repository has not changed
+.It Pa /var/db/reposync/known_hosts
+passed to
+.Xr ssh 1
+as a
+.Cm UserKnownHostsFile
+.El
+.Pp
+If
+.Pa /var/db/reposync/known_hosts
+does not exist at startup,
+.Nm
+will populate it from
+.Pa ~/.ssh/known_hosts
+or
+.Pa /usr/local/share/examples/reposync/ssh_known_hosts .
+The
+.Nm
+package provides default hostkeys of official OpenBSD mirrors known to
+support rsync over ssh-forwarding.
 .Sh EXAMPLES
-.Dl $ reposync rsync://mirror.example.org/cvs
+.Ic $ doas -u cvs reposync rsync://mirror.example.org/cvs
 .Pp
 Connect via
 .Xr ssh 1
@@ -96,7 +121,7 @@ to connect to rsync using an encrypted, authenticated channel and
 update the default local directory
 .Pa /cvs .
 .Pp
-.Dl $ reposync -s src,xenocara rsync://mirror.example.org/cvs
+.Ic $ doas -u cvs reposync -s src,xenocara rsync://mirror.example.org/cvs
 .Pp
 As above, but only fetch
 .Qq src
@@ -104,12 +129,12 @@ and
 .Qq xenocara
 sets.
 .Pp
-.Dl $ reposync -q rsync://mirror.example.org/cvs /home/cvs
+.Ic $ reposync -q rsync://mirror.example.org/cvs ~/cvs
 .Pp
 Connect via
 .Xr ssh 1
 to anoncvs@mirror.example.org and update the local directory
-.Pa /home/cvs .
+.Pa ~/cvs .
 Use quiet output.
 .Sh SEE ALSO
 .Xr cvs 1 ,
