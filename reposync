@@ -29,10 +29,12 @@ usage()
 force=false
 flags=-i
 fwduser=anoncvs
+quiet=false
 sets=www,xenocara,ports,src
 while getopts "fl:pqs:" c; do
 	case $c in
-	q) flags=-q		;;
+	q) quiet=true
+	   flags=-q		;;
 	f) force=true
 	   forced=" [forced]"	;;
 	l) fwduser=$OPTARG	;;
@@ -108,7 +110,7 @@ if [[ -n $fwduser ]]; then
 	sshtrap="ssh -Fnone -S $sockfile -O exit -q -l $fwduser erewhon"
 else
 	sshtrap=true
-	echo "Warning: using non-authenticated cleartext rsync protocol." >&2
+	$quiet || echo "Warning: using non-authenticated cleartext rsync protocol." >&2
 fi
 trap "$sshtrap; rm -f $lockfile" 0 1 2 15
 
