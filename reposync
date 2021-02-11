@@ -152,7 +152,7 @@ if $force || [[ $oldhash != "$newhash" ]]; then
 	# only update saved hash if sync was successful; otherwise leave
 	# the old one so sync is reattempted next run
 	if run_rsync -rlptz $flags --omit-dir-times --delete \
-	    --exclude='#cvs.rfl.*' --exclude='CVSROOT/history*' \
+	    --exclude='#cvs.*' --exclude='CVSROOT/history*' \
 	    ${synchost}/{CVSROOT,${sets}} "$repodir"/; then
 		echo "$newhash" > $hashfile
 		logger -t reposync -p user.info \
