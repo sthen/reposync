@@ -1,6 +1,6 @@
 # public keys match fingerprints supplied by mirror operators, recorded in
-# 	$OpenBSD: mirrors.dat,v 1.602 2020/03/04 15:00:22 sthen Exp $
-anoncvs.au.openbsd.org ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBKDCcpTR+00ygfH+7WnZGWUKWrDvH1gaXkBeyGaVkPLf73mIJEuaCwh0aWalf+ccc76VWj6CRLnC6W3Mj/9VK7U=
+# 	$OpenBSD: mirrors.dat,v 1.626 2021/05/28 10:32:38 sthen Exp $
+anoncvs.au.openbsd.org ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPpTeopRqdpT0ayCNONtNu4Lic7Rt6MZ9qzSGeKubWwb
 anoncvs.comstyle.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFWyL989mMJukRIbkUuFc3MeQr7gc1jVEfq7rgHzB1M1
 obsdacvs.cs.toronto.edu ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILGXaVJmoeErILiy/AcpEdXjje8qT52c1uZQ57OAeV2S
 anoncvs.fr.openbsd.org ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAWAOWswB2i9A/JPqM4HW4R/a6wnxuz6V1KLX5/UFpTt
