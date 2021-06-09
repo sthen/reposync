@@ -158,12 +158,12 @@ finish() {
 	shift
 	length=$(($(date +%s)-start))
 	logger -t reposync -p user.info "${synchost}: $*, ${length}s${forced}"
-	if [[ -n ${warntime} && ${length} > ${warntime} ]]; then
+	if [[ -n ${warntime} && ${length} -gt ${warntime} ]]; then
 		reason="failed"
 		$success && reason="successful"
 		err "slow $reason rsync, ${length}s"
 	else
-		$errexit || err "rsync failed"
+		$success || err "rsync failed"
 	fi
 }
 
