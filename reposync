@@ -22,7 +22,8 @@ err()
 
 usage()
 {
-	echo "usage: ${0##*/} [-fq] [-p | -l username] [-s sets] rsync://upstream/path [destination]" >&2
+	echo "usage: ${0##*/} [-fq] [-p | -l username] [-s sets] [-w warntime]" >&2
+	echo "                rsync://upstream/path [destination]" >&2
 	exit 1
 }
 
@@ -40,7 +41,7 @@ while getopts "fl:pqs:w:" c; do
 	   forced=" [forced]"	;;
 	l) fwduser=$OPTARG	;;
 	p) fwduser=		;;
-	s) if [[ -n $OPTARG ]] && echo $OPTARG |
+	s) if [[ -n $OPTARG ]] && echo "$OPTARG" |
 	     sed -E 's/(www|xenocara|ports|src)(,|$)//g' |
 	     grep -q '^$'; then
 		sets=$OPTARG
@@ -52,13 +53,14 @@ while getopts "fl:pqs:w:" c; do
 	   else
 		err "invalid warning time"
 	   fi			;;
+	*) usage		;;
 	esac
 done
 shift $((OPTIND-1))
 [[ $# == [12] ]] || usage
 
 synchost=$1
-repodir=$(readlink -f ${2:-/cvs})
+repodir=$(readlink -f "${2:-/cvs}")
 rundir=/var/db/reposync
 
 start=$(date +%s)
@@ -101,6 +103,7 @@ if [[ -h $lockfile ]]; then
 	lockedpid=$(stat -f %Y $lockfile)
 
 	# exit if it's A) still running and B) looks like this script
+# shellcheck disable=SC2009
 	if ps -o command -p "$lockedpid" | grep -q "${0##*/}"; then
 		err "already running?"
 	fi
@@ -117,6 +120,7 @@ else
 	sshtrap=true
 	$quiet || echo "Warning: using non-authenticated cleartext rsync protocol." >&2
 fi
+# shellcheck disable=SC2064
 trap "$sshtrap; rm -f $lockfile" 0 1 2 15
 
 if [[ ! -e $rundir/known_hosts && -r ~/.ssh/known_hosts ]]; then
@@ -135,6 +139,7 @@ _e=$?
 		err "host key verification failed - see $rundir/known_hosts" ;;
 esac
 [[ $_e -eq 0 ]] || err "rsync error: $_t"
+# shellcheck disable=SC2086
 newhash="${synchost} ${sets} $(echo $_t | sha256)"
 
 if [[ -r $hashfile ]]; then
@@ -170,6 +175,7 @@ finish() {
 if $force || [[ $oldhash != "$newhash" ]]; then
 	# only update saved hash if sync was successful; otherwise leave
 	# the old one so sync is reattempted next run
+# shellcheck disable=SC2086
 	if run_rsync -rlptz $flags --omit-dir-times --delete \
 	    --exclude='#cvs.*' --exclude='CVSROOT/history*' \
 	    ${synchost}/{CVSROOT,${sets}} "$repodir"/; then
