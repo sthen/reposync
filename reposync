@@ -31,7 +31,8 @@ flags=-i
 fwduser=anoncvs
 quiet=false
 sets=www,xenocara,ports,src
-while getopts "fl:pqs:" c; do
+warntime=
+while getopts "fl:pqs:w:" c; do
 	case $c in
 	q) quiet=true
 	   flags=-q		;;
@@ -46,7 +47,11 @@ while getopts "fl:pqs:" c; do
 	   else
 		err "invalid sets"
 	   fi			;;
-	*) usage		;;
+	w) if [[ -n ${OPTARG##*[!0-9]*} ]]; then
+		warntime=$OPTARG
+	   else
+		err "invalid warning time"
+	   fi			;;
 	esac
 done
 shift $((OPTIND-1))
@@ -148,6 +153,20 @@ fi
 
 [[ $oldhash != "$newhash" ]] && reason="new files seen, "
 
+finish() {
+	success=$1
+	shift
+	length=$(($(date +%s)-start))
+	logger -t reposync -p user.info "${synchost}: $*, ${length}s${forced}"
+	if [[ -n ${warntime} && ${length} > ${warntime} ]]; then
+		reason="failed"
+		$success && reason="successful"
+		err "slow $reason rsync, ${length}s"
+	else
+		$errexit || err "rsync failed"
+	fi
+}
+
 if $force || [[ $oldhash != "$newhash" ]]; then
 	# only update saved hash if sync was successful; otherwise leave
 	# the old one so sync is reattempted next run
@@ -155,14 +174,10 @@ if $force || [[ $oldhash != "$newhash" ]]; then
 	    --exclude='#cvs.*' --exclude='CVSROOT/history*' \
 	    ${synchost}/{CVSROOT,${sets}} "$repodir"/; then
 		echo "$newhash" > $hashfile
-		logger -t reposync -p user.info \
-		    "${synchost}: ${reason}updated, $(($(date +%s)-start))s${forced}"
+		finish true "${reason}updated"
 	else
-		logger -t reposync -p user.notice \
-		    "${synchost}: ${reason}failed, $(($(date +%s)-start))s${forced}"
-		err "rsync failed"
+		finish false "${reason}failed"
 	fi
 else
-	logger -t reposync -p user.info \
-	    "${synchost}: no update, $(($(date +%s)-start))s"
+	finish true "no update"
 fi

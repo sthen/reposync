@@ -23,6 +23,7 @@
 .Op Fl fq
 .Op Fl p | Fl l Ar username
 .Op Fl s Ar sets
+.Op Fl w Ar warntime
 .Ar rsync://upstream/path
 .Op Ar destination
 .Sh DESCRIPTION
@@ -62,7 +63,8 @@ The options are as follows.
 Force updating, even if CVSROOT has not been updated.
 .It Fl l Ar username
 .Xr ssh 1
-port-forwarding is used with the specified username.
+port-forwarding is used with the specified
+.Ar username .
 By default, this is enabled with the username
 .Qq anoncvs .
 .It Fl p
@@ -86,6 +88,10 @@ giving the most information in error conditions.
 Specify a comma-separated list of file sets.
 By default, all standard sets are fetched:
 .Qq www,xenocara,ports,src .
+.It Fl w Ar warntime
+If the sync takes longer than
+.Ar warntime
+seconds, display a warning and exit with an error code.
 .El
 .Sh FILES
 .Bl -tag -width "/var/db/reposync/reposync.hash" -compact
