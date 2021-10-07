@@ -166,7 +166,7 @@ finish() {
 	if [[ -n ${warntime} && ${length} -gt ${warntime} ]]; then
 		reason="failed"
 		$success && reason="successful"
-		err "slow $reason rsync, ${length}s"
+		err "slow $reason rsync, $((length/60))m$((length%60))s"
 	else
 		$success || err "rsync failed"
 	fi
