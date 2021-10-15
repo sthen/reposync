@@ -63,7 +63,6 @@ synchost=$1
 repodir=$(readlink -f "${2:-/cvs}")
 rundir=/var/db/reposync
 
-start=$(date +%s)
 oldhash=invalid
 hashfile=$rundir/reposync.hash
 lockfile=$rundir/reposync.lock
@@ -161,7 +160,7 @@ fi
 finish() {
 	success=$1
 	shift
-	length=$(($(date +%s)-start))
+	length=$SECONDS
 	logger -t reposync -p user.info "${synchost}: $*, ${length}s${forced}"
 	if [[ -n ${warntime} && ${length} -gt ${warntime} ]]; then
 		reason="failed"
