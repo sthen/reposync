@@ -20,7 +20,7 @@
 .Nd update OpenBSD source repository
 .Sh SYNOPSIS
 .Nm
-.Op Fl fq
+.Op Fl 46fq
 .Op Fl p | Fl l Ar username
 .Op Fl s Ar sets
 .Op Fl w Ar warntime
@@ -59,6 +59,10 @@ directory must exist and be writable by the user running
 .Pp
 The options are as follows.
 .Bl -tag -width Ds
+.It Fl 4
+Connect using IPv4.
+.It Fl 6
+Connect using IPv6.
 .It Fl f
 Force updating, even if CVSROOT has not been updated.
 .It Fl l Ar username

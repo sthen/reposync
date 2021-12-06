@@ -22,19 +22,22 @@ err()
 
 usage()
 {
-	echo "usage: ${0##*/} [-fq] [-p | -l username] [-s sets] [-w warntime]" >&2
+	echo "usage: ${0##*/} [-46fq] [-p | -l username] [-s sets] [-w warntime]" >&2
 	echo "                rsync://upstream/path [destination]" >&2
 	exit 1
 }
 
 force=false
 flags=-i
+ipflags=
 fwduser=anoncvs
 quiet=false
 sets=www,xenocara,ports,src
 warntime=
-while getopts "fl:pqs:w:" c; do
+while getopts "46fl:pqs:w:" c; do
 	case $c in
+	4) ipflags=-4		;;
+	6) ipflags=-6		;;
 	q) quiet=true
 	   flags=-q		;;
 	f) force=true
@@ -72,7 +75,7 @@ run_rsync()
 {
 	if [[ -n $fwduser ]]; then
 		# reach rsync on the server via an ssh port-forward
-		sshopts="-S $sockfile"
+		sshopts="$ipflags -S $sockfile"
 		sshopts="$sshopts -o ControlMaster=auto"
 		sshopts="$sshopts -o ControlPersist=1m"
 		sshopts="$sshopts -o BatchMode=Yes"
@@ -82,7 +85,7 @@ run_rsync()
 		/usr/local/bin/rsync -e "ssh $sshopts" "$@" 2>&1
 	else
 		# plain rsync-over-TCP
-		/usr/local/bin/rsync "$@" 2>&1
+		/usr/local/bin/rsync $ipflags "$@" 2>&1
 	fi
 }
 
