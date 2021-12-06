@@ -11,7 +11,7 @@ reposync-$V.tar.gz: reposync reposync.1 ssh_known_hosts Makefile
 ssh_known_hosts: /var/www/openbsd-www/build/mirrors.dat
 	echo "# public keys match fingerprints supplied by mirror operators, recorded in" > ssh_known_hosts; \
 	echo "# `what /var/www/openbsd-www/build/mirrors.dat | tail -1`" >> ssh_known_hosts
-	genkeys >> ssh_known_hosts
+	./genkeys >> ssh_known_hosts
 
 upload: reposync-$V.tar.gz
 	scp reposync-$V.tar.gz naiad:mirrors/
