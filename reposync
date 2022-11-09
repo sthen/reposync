@@ -67,9 +67,10 @@ repodir=$(readlink -f "${2:-/cvs}")
 rundir=/var/db/reposync
 
 oldhash=invalid
-hashfile=$rundir/reposync.hash
-lockfile=$rundir/reposync.lock
-sockfile=$rundir/reposync.sock
+prefix=$rundir/$(echo $synchost | sed -E 's/[^A-Za-z0-9.-]+/_/g')
+hashfile=$prefix.hash
+lockfile=$prefix.lock
+sockfile=$prefix.sock
 
 run_rsync()
 {
@@ -142,7 +143,7 @@ _e=$?
 esac
 [[ $_e -eq 0 ]] || err "rsync error: $_t"
 # shellcheck disable=SC2086
-newhash="${synchost} ${sets} $(echo $_t | sha256)"
+newhash="${sets} $(echo $_t | sha256)"
 
 if [[ -r $hashfile ]]; then
 	age=$(($(date +%s) - $(stat -t %s -f %m $hashfile)))
