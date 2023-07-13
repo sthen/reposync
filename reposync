@@ -16,6 +16,7 @@
 
 err()
 {
+	logger -t reposync -p user.err "${synchost}: $*"
 	echo "${0##*/}: $*" >&2
 	exit 1
 }
@@ -164,12 +165,17 @@ finish() {
 	success=$1
 	shift
 	length=$SECONDS
-	logger -t reposync -p user.info "${synchost}: $*, ${length}s${forced}"
+	outcome="failed"
+	level="err"
+	$success && outcome="successful"
 	if [[ -n ${warntime} && ${length} -gt ${warntime} ]]; then
-		reason="failed"
-		$success && reason="successful"
-		err "slow $reason rsync, $((length/60))m$((length%60))s"
+		$success && level="notice"
+		logger -t reposync -p user.info "${synchost}: $*, ${length}s${forced}, $outcome (slow)"
+		warn "slow $outcome rsync, $((length/60))m$((length%60))s"
+		exit 1
 	else
+		$success && level="info"
+		logger -t reposync -p user.info "${synchost}: $*, ${length}s${forced}, $outcome"
 		$success || err "rsync failed"
 	fi
 }
