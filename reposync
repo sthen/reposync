@@ -21,6 +21,12 @@ err()
 	exit 1
 }
 
+warn()
+{
+	logger -t reposync -p user.notice "${synchost}: $*"
+	echo "${0##*/}: $*" >&2
+}
+
 usage()
 {
 	echo "usage: ${0##*/} [-46fq] [-p | -l username] [-s sets] [-w warntime]" >&2
@@ -121,7 +127,7 @@ if [[ -n $fwduser ]]; then
 	sshtrap="ssh -Fnone -S $sockfile -O exit -q -l $fwduser erewhon"
 else
 	sshtrap=true
-	$quiet || echo "Warning: using non-authenticated cleartext rsync protocol." >&2
+	$quiet || warn "using non-authenticated cleartext rsync protocol."
 fi
 # shellcheck disable=SC2064
 trap "$sshtrap; rm -f $lockfile" 0 1 2 15
@@ -165,17 +171,20 @@ finish() {
 	success=$1
 	shift
 	length=$SECONDS
-	outcome=", failed"
-	level="err"
-	$success && outcome=""
+	if $success; then
+		outcome=""
+		level="info"
+	else
+		outcome=", failed"
+		level="err"
+	fi
 	if [[ -n ${warntime} && ${length} -gt ${warntime} ]]; then
 		$success && level="notice"
-		logger -t reposync -p user.info "${synchost}: $*, ${length}s${forced}$outcome (slow)"
-		warn "slow $outcome rsync, $((length/60))m$((length%60))s"
+		logger -t reposync -p user.${level} "${synchost}: $*, ${length}s${forced}${outcome} (slow)"
+		warn "slow ${outcome} rsync, $((length/60))m$((length%60))s"
 		exit 1
 	else
-		$success && level="info"
-		logger -t reposync -p user.info "${synchost}: $*, ${length}s${forced}$outcome"
+		logger -t reposync -p user.${level} "${synchost}: $*, ${length}s${forced}${outcome}"
 		$success || err "rsync failed"
 	fi
 }
