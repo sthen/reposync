@@ -34,6 +34,7 @@ usage()
 	exit 1
 }
 
+csumflag=
 force=false
 flags=-i
 ipflags=
@@ -48,7 +49,8 @@ while getopts "46fl:pqs:w:" c; do
 	q) quiet=true
 	   flags=-q		;;
 	f) force=true
-	   forced=" [forced]"	;;
+	   forced=" [forced]"
+	   csumflag=-c		;;
 	l) fwduser=$OPTARG	;;
 	p) fwduser=		;;
 	s) if [[ -n $OPTARG ]] && echo "$OPTARG" |
@@ -193,7 +195,7 @@ if $force || [[ $oldhash != "$newhash" ]]; then
 	# only update saved hash if sync was successful; otherwise leave
 	# the old one so sync is reattempted next run
 # shellcheck disable=SC2086
-	if run_rsync -rlptz $flags --omit-dir-times --delete \
+	if run_rsync -rlptz $flags $csumflag --omit-dir-times --delete \
 	    --exclude='#cvs.*' --exclude='CVSROOT/history*' \
 	    ${synchost}/{CVSROOT,${sets}} "$repodir"/; then
 		echo "$newhash" > $hashfile
