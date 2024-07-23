@@ -98,8 +98,8 @@ If the sync takes longer than
 seconds, display a warning and exit with an error code.
 .El
 .Sh FILES
-.Bl -tag -width "/var/db/reposync/reposync.hash" -compact
-.It Pa /var/db/reposync/reposync.hash
+.Bl -tag -width "/var/db/reposync/*.hash" -compact
+.It Pa /var/db/reposync/*.hash
 stores a hash of the CVSROOT directory listing to detect if the
 repository has not changed
 .It Pa /var/db/reposync/known_hosts
